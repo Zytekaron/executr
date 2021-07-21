@@ -9,10 +9,16 @@ const db = require('./db');
 const exec = require('./exec');
 
 const auth = process.env.ZYTEKARON_AUTH;
+
 const cache = new Map();
 async function getExecutor(id) {
     if (!cache.has(id)) {
-        const doc = await db.get(id) || await db.findOne({ name: id });
+        const doc = await db.findOne({
+            $or: [
+                { _id: id },
+                { name: id }
+            ]
+        });
         if (doc) cache.set(id, doc);
     }
     return cache.get(id);
@@ -60,6 +66,8 @@ app.get('/:id', async (req, res) => {
 app.delete('/:id', async (req, res) => {
     try {
         await db.delete(req.params.id);
+        cache.delete(req.params.id);
+        
         res.status(200).send({ success: true });
     } catch (err) {
         res.status(500).send({ success: false, error: 'Error whilst deleting: ' + err });
@@ -70,6 +78,8 @@ app.delete('/:id', async (req, res) => {
 app.patch('/:id', async (req, res) => {
     try {
         await db.update(req.params.id, req.body);
+        cache.delete(req.params.id);
+
         res.status(200).send({ success: true });
     } catch (err) {
         res.status(500).send({ success: false, error: 'Error whilst updating: ' + err });
@@ -82,6 +92,7 @@ app.post('/', async (req, res) => {
     try {
         data._id = data.id || randomId();
         await db.insert(data);
+        cache.delete(data.id);
 
         res.status(200).send({ success: true, data: { id: data._id, name: data.name, code: data.code } });
     } catch (err) {
