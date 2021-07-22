@@ -13,7 +13,7 @@ const { inspect } = require('util');
 const _caches = new Map();
 const _getCache = (id) => {
     if (!_caches.has(id)) {
-        !_caches.set(id, new Map());
+        _caches.set(id, new Map());
     }
     return _caches.get(id);
 }
@@ -21,5 +21,9 @@ const _getCache = (id) => {
 module.exports = async (id, code, args = []) => {
     const cache = _getCache(id);
 
-    return inspect(eval(code));
+    try {
+        return inspect(await eval(code));
+    } catch (err) {
+        return err.toString();
+    }
 }
