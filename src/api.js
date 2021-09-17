@@ -67,7 +67,7 @@ app.delete('/:id', async (req, res) => {
     try {
         await db.delete(req.params.id);
         cache.delete(req.params.id);
-        
+
         res.status(200).send({ success: true });
     } catch (err) {
         res.status(500).send({ success: false, error: 'Error whilst deleting: ' + err });
