@@ -117,7 +117,7 @@ app.post('/:id', async (req, res) => {
     }
 });
 
-app.use((req, res) => {
+app.use((_, res) => {
     res.status(404).send({ success: false, error: 'Not Found' });
 });
 
