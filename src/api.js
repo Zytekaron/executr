@@ -5,7 +5,7 @@ const app = Router();
 const randomString = require('jvar/utility/randomString');
 const randomId = () => randomString(16, '0123456789abcdef')
 
-const db = require('./db');
+const { funcs } = require('./db');
 const exec = require('./exec');
 
 const auth = process.env.ZYTEKARON_AUTH;
@@ -13,7 +13,7 @@ const auth = process.env.ZYTEKARON_AUTH;
 const cache = new Map();
 async function getExecutor(id) {
     if (!cache.has(id)) {
-        const doc = await db.find({
+        const doc = await funcs.find({
             $or: [
                 { _id: id },
                 { name: id }
@@ -66,7 +66,7 @@ app.get('/:id', async (req, res) => {
 // Delete an executor
 app.delete('/:id', async (req, res) => {
     try {
-        await db.delete(req.params.id);
+        await funcs.delete(req.params.id);
         cache.delete(req.params.id);
 
         res.status(200).send({ success: true });
@@ -78,7 +78,7 @@ app.delete('/:id', async (req, res) => {
 // Update an executor
 app.patch('/:id', async (req, res) => {
     try {
-        await db.update(req.params.id, req.body);
+        await funcs.update(req.params.id, req.body);
         cache.delete(req.params.id);
 
         res.status(200).send({ success: true });
@@ -92,7 +92,7 @@ app.post('/', async (req, res) => {
     const data = req.body;
     try {
         data._id = data.id || randomId();
-        await db.insert(data);
+        await funcs.insert(data);
         cache.delete(data.id);
 
         res.status(200).send({ success: true, data: { id: data._id, name: data.name, code: data.code } });
@@ -115,6 +115,10 @@ app.post('/:id', async (req, res) => {
     } catch (err) {
         res.status(500).send({ success: false, data: err.toString() });
     }
+});
+
+app.use((req, res) => {
+    res.status(404).send({ success: false, error: 'Not Found' });
 });
 
 module.exports = app;
