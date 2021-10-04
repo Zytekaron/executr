@@ -7,26 +7,42 @@ const client = new MongoClient(process.env.MONGO_URL, {
 module.exports = {
     async init() {
         await client.connect();
-        this.collection = client.db('zytekaron').collection('funcs');
+        this.funcs.collection = client.db('zytekaron').collection('funcs');
+        this.store.collection = client.db('zytekaron').collection('funcs_store');
+        this.ready = true;
     },
-    async get(id) {
-        return this.collection.findOne({ _id: id });
+    funcs: {
+        async get(_id) {
+            return this.collection.findOne({ _id });
+        },
+        async find(query) {
+            return this.collection.findOne(query);
+        },
+        async insert(doc) {
+            return this.collection.insertOne(doc);
+        },
+        async update(_id, data) {
+            return this.collection.updateOne({ _id }, { $set: data });
+        },
+        async delete(_id) {
+            return this.collection.deleteOne({ _id });
+        },
+        async all() {
+            const cursor = await this.collection.find({});
+            return cursor.toArray();
+        }
     },
-    async findOne(query) {
-        const cursor = await this.collection.find(query);
-        return (await cursor.toArray())[0];
-    },
-    async insert(doc) {
-        return this.collection.insertOne(doc);
-    },
-    async update(id, data) {
-        return this.collection.updateOne({ _id: id }, { $set: data });
-    },
-    async delete(id) {
-        return this.collection.deleteOne({ _id: id });
-    },
-    async all() {
-        const cursor = await this.collection.find({});
-        return cursor.toArray();
+    store: {
+        async set(_id, key, value) {
+            const update = { $set: { [key]: value } };
+            await this.collection.updateOne({ _id }, update, { upsert: true });
+        },
+        async get(_id, key) {
+            const doc = await this.collection.findOne({ _id });
+            return doc?.[key];
+        },
+        async delete(_id, key) {
+            await this.set(_id, key, null);
+        }
     }
-}
+};

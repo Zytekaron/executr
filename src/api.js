@@ -13,7 +13,7 @@ const auth = process.env.ZYTEKARON_AUTH;
 const cache = new Map();
 async function getExecutor(id) {
     if (!cache.has(id)) {
-        const doc = await db.findOne({
+        const doc = await db.find({
             $or: [
                 { _id: id },
                 { name: id }
@@ -21,6 +21,7 @@ async function getExecutor(id) {
         });
         if (doc) cache.set(id, doc);
     }
+    
     return cache.get(id);
 }
 

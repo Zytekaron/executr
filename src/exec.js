@@ -21,16 +21,28 @@ const _getCache = (id) => {
     return _caches.get(id);
 }
 
-module.exports = async (id, code, args = []) => {
-    const cache = _getCache(id);
+const { store: _store } = require('./db');
+const _getStore = (id) => {
+    return _.mapValues(_store, value =>
+        typeof value == 'function'
+            ? value.bind(_store, id)
+            : value
+    );
+}
+
+const _ctx = require('fs').readFileSync(__dirname + '/exec.js');
+
+module.exports = async (_script, code, args = []) => {
+    const cache = _getCache(_script);
+    const store = _getStore(_script);
 
     try {
         const _result = await eval(code);
-        if (type(_result) == 'string') {
-            return _result;
-        }
-        return inspect(_result);
+
+        return type(_result) == 'string'
+            ? _result
+            : inspect(_result);
     } catch (err) {
         return err.toString();
     }
-}
+};
