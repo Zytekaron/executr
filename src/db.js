@@ -34,7 +34,10 @@ module.exports = {
     },
     store: {
         async set(_id, key, value) {
-            const update = { $set: { [key]: value } };
+            const update = {
+                $setOnInsert: { _id },
+                $set: { [key]: value }
+            };
             await this.collection.updateOne({ _id }, update, { upsert: true });
         },
         async get(_id, key) {
@@ -42,7 +45,11 @@ module.exports = {
             return doc?.[key];
         },
         async delete(_id, key) {
-            await this.set(_id, key, null);
+            const update = {
+                $setOnInsert: { _id },
+                $unset: { [key]: "" }
+            };
+            await this.collection.updateOne({ _id }, update, { upsert: true });
         }
     }
 };
