@@ -1,5 +1,4 @@
 const Discord = require('discord.js');
-const Eris = require('eris');
 const centra = require('centra');
 const superagent = require('superagent');
 const ms = require('ms');
@@ -10,8 +9,6 @@ const type = require('jvar/fn/type');
 const randomString = require('jvar/utility/randomString');
 const randomId = () => randomString(16, '0123456789abcdef');
 const { inspect } = require('util');
-
-const discordClient = new Eris('Bot ' + process.env.DISCORD_BOT_TOKEN);
 
 const _caches = new Map();
 const _getCache = (id) => {
