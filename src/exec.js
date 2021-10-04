@@ -27,7 +27,9 @@ const _getStore = (id) => {
     );
 }
 
-const _ctx = require('fs').readFileSync(__dirname + '/exec.js');
+const _ctx = require('fs')
+    .readFileSync(__dirname + '/exec.js')
+    .toString();
 
 module.exports = async (_script, code, args = []) => {
     const cache = _getCache(_script);

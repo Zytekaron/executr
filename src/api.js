@@ -92,6 +92,8 @@ app.post('/', async (req, res) => {
     const data = req.body;
     try {
         data._id = data.id || randomId();
+        delete data.id;
+        
         await funcs.insert(data);
         cache.delete(data.id);
 
