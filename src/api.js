@@ -39,17 +39,9 @@ app.use((req, res, next) => {
     next();
 });
 
-// Run a section of code
-app.post('/run', async (req, res) => {
-    const { code, args } = req.body;
-
-    try {
-        const result = await exec('', code, args);
-        
-        res.status(200).send({ success: true, data: result });
-    } catch (err) {
-        res.status(500).send({ success: false, data: err.toString() });
-    }
+// Ping
+app.get('/', (req, res) => {
+    res.status(200).send({ success: true });
 });
 
 // View an executor
@@ -93,13 +85,26 @@ app.post('/', async (req, res) => {
     try {
         data._id = data.id || randomId();
         delete data.id;
-        
+
         await funcs.insert(data);
         cache.delete(data.id);
 
         res.status(200).send({ success: true, data: { id: data._id, name: data.name, code: data.code } });
     } catch (err) {
         res.status(500).send({ success: false, error: 'Error whilst inserting: ' + err });
+    }
+});
+
+// Run a section of code
+app.post('/run', async (req, res) => {
+    const { code, args } = req.body;
+
+    try {
+        const result = await exec('', code, args);
+
+        res.status(200).send({ success: true, data: result });
+    } catch (err) {
+        res.status(500).send({ success: false, data: err.toString() });
     }
 });
 
